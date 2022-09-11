@@ -1,0 +1,90 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+.task--header {
+    padding: .75rem 1.5rem;
+    background: lightgray;
+}
+
+.task--header .task--description {
+    padding-top: .25rem;
+    font-size: large;
+}
+
+.task--id {
+    text-transform: uppercase;
+}
+
+
+/* Buttons bar */
+.controls-bar {
+    padding: .5rem 1.5rem;
+}
+
+.controls-bar button,
+.controls-bar select {
+    padding: 0.25rem;
+    font-size: small;
+    border: 1px solid grey;
+    border-radius: 5px;
+}
+
+.controls-bar select,
+.controls-bar select:hover{
+    background: rgb(238, 238, 238);
+}
+
+.controls-bar button i {
+    padding-right: .15rem;
+}
+
+.floating-end-button {
+    float: right;
+}
+
+
+/* Task content */
+
+.container-fluid {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    padding-top: .25rem;
+}
+
+.section--header span hr{
+    margin: 0;
+    padding: 0;
+}
+
+.details--item {
+    font-size: .8rem;
+    line-height: 1.8rem;
+}
+
+.rounded-image {
+    height: 25px;
+    width: 25px;
+    border-radius: 50%;
+}
+
+.section-body .task--description {
+    font-size: .8rem;
+}
+
+
+/* Comments */
+.comment-header {
+    display: flex;
+}
+
+.comment-content {
+    font-size: .75rem;
+}
+
+.modal-body textarea {
+    width: 100%;
+    padding: 5px;
+    font-size: .8rem;
+    border-radius: 5px;
+}

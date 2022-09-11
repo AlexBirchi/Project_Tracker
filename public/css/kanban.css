@@ -1,0 +1,74 @@
+@import "user-icon-name.css";
+
+/* Task card */
+.cursor-grab {
+    cursor: grab;
+}
+
+.task--assign img {
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+.task--assign .difficulty {
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    background: #fff;
+    border: 1px solid #666;
+    color: #666;
+    text-align: center;
+}
+
+/*  Floating button */
+.fab-container {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    cursor: pointer;
+}
+
+.button--icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 100%;
+    background: #FF4F79;
+    box-shadow: 2px 2px 5px #aaaaaa;
+}
+.button {
+    width: 60px;
+    height: 60px;
+    background:gray;
+}
+
+.button--icon i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color:white;
+}
+
+p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: max-content;
+}
+
+/* Spinner container */
+.spinner-end {
+    display: flex;
+    justify-content: center;
+}
+
+.grid-container {
+    margin-left: .1rem;
+    margin-right: .1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-gap: .5rem;
+}

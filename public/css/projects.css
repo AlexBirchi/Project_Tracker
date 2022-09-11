@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+@import "fab-button.css";
+
+*{
+    box-sizing: border-box;
+}
+
+/* Title */
+.main_content .title {
+    font-size: 25px;
+    font-weight: 500;
+    color: #1d1b31;
+    margin: 12px;
+}
+
+/* Page header */
+.page--header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+}
+
+
+/* Content */
+.projects--section {
+    padding: 1rem;
+}
+
+.project--link {
+    text-decoration: none;
+    color: black;
+}
+
+
+/* Search box */
+.search-box{
+    width: fit-content;
+    height: fit-content;
+    position: relative;
+}
+.input-search{
+    height: 50px;
+    width: 50px;
+    border-style: none;
+    padding: 10px;
+    font-size: 18px;
+    letter-spacing: 2px;
+    outline: none;
+    border-radius: 25px;
+    transition: all .5s ease-in-out;
+    background-color: gray;
+    padding-right: 40px;
+    color:black;
+}
+.input-search::placeholder{
+    color:gray;
+    font-size: 18px;
+    letter-spacing: 2px;
+    font-weight: 100;
+}
+.btn-search{
+    width: 50px;
+    height: 50px;
+    border-style: none;
+    font-size: 20px;
+    font-weight: bold;
+    outline: none;
+    cursor: pointer;
+    border-radius: 50%;
+    position: absolute;
+    right: 0px;
+    color:white ;
+    background-color:transparent;
+    pointer-events: painted;
+}
+.btn-search:focus ~ .input-search{
+    width: 300px;
+    border-radius: 0px;
+    background-color: transparent;
+    border-bottom:1px solid gray;
+    transition: all 500ms cubic-bezier(0, 0.110, 0.35, 2);
+}
+.input-search:focus{
+    width: 300px;
+    border-radius: 0px;
+    color: black;
+    background-color: transparent;
+    border-bottom:1px solid gray;
+    transition: all 500ms cubic-bezier(0, 0.110, 0.35, 2);
+}
+
+/* Stacking user icons*/
+.rounded-icon {
+    border-radius: 50%;
+    height: 30px;
+    line-height: 30px;
+    width: 30px;
+    background: red;
+    border: 1px solid #666;
+    color: #666;
+    text-align: center;
+}
+
+.users--avatars {
+    display: flex;
+    justify-content: center;
+}
+
+.user--overlap {
+    display: flex;
+}
+.user--overlap div:not(:first-child) {
+    margin-left: -15px;
+}
+.user--overlap div {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+

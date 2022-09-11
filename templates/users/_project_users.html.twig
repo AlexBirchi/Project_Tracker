@@ -1,0 +1,7 @@
+{% for user in users %}
+    {% if selected is not null and selected == user.getEmail() %}
+        <option selected value="{{ user.getId() }}">{{ user.getEmail() }}</option>
+    {% else %}
+        <option value="{{ user.getId() }}">{{ user.getEmail() }}</option>
+    {% endif %}
+{% endfor %}

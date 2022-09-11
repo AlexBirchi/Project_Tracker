@@ -1,0 +1,430 @@
+{% extends 'base.html.twig' %}
+
+{% block head %}
+    {% block title %}<title>{{ item.getTitle() }}</title>{% endblock %}
+
+    {% block stylesheets %}
+        <link rel="stylesheet" href="{{asset('css/task.css')}}">
+    {% endblock %}
+
+    {% block javascripts%}
+        <script src="{{ asset('js/kanban.js') }}"></script>
+    {% endblock %}
+
+{% endblock %}
+
+{% block main %}
+
+    <div class="task--header d-flex justify-content-between align-items-center">
+        <div class="inner">
+            <span class="task-breadcrumbs">
+                <a href="project.html" class="task--project-title">{{ item.getProject().getName() }}</a>
+                /
+                <a href="{{ path('task_details', {id: item.getId(), project: app.request.pathInfo|split('/')[1]}) }}" class="task--id">{{ item.getProject().getTag() }} - {{ item.getNumber() }}</a>
+            </span>
+
+            <h4 class="task--description">{{ item.getTitle() }}</h4>
+        </div>
+
+        <!-- Spinner -->
+        <div id="spinner" class="spinner-end" hidden>
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('danger') %}
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div class="task--details">
+        <div class="controls-bar">
+            <button data-bs-toggle="modal" data-bs-target="#edit-modal"><i
+                        class="fa-solid fa-pen-to-square"></i><span>Edit</span></button>
+            <button data-bs-toggle="modal" data-bs-target="#new-comment-modal"><i
+                        class="fa-solid fa-comment"></i><span>Comment</span></button>
+            <select class="button-select" onchange="handleChange(event)" aria-label="Workflow select"
+                    aria-placeholder="Workflow" url="{{ path('app_item_status_change', {'project': app.request.pathInfo|split('/')[1], 'id': item.getId()}) }}">
+                <option selected hidden>Workflow</option>
+                {% for status in statuses %}
+                    <option value="{{ status.getName() }}">{{ status.getName() }}</option>
+                {% endfor %}
+            </select>
+
+            <button class="floating-end-button"><i class="fa-solid fa-file-export"></i><span>Export</span></button>
+        </div>
+
+        <!-- Details -->
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Left section -->
+                <div class="col-8">
+                    <!-- Details -->
+                    <div class="section">
+                        <div class="section--header">
+                                <span>
+                                    <h6>Details</h6>
+                                    <hr />
+                                </span>
+                        </div>
+                        <div class="section-body p-2">
+                            <div class="row">
+                                <div class="col-6">
+                                    <!-- Details item -->
+                                    <div class="row details--item">
+                                        <div class="col-6">
+                                            Type:
+                                        </div>
+                                        <div class="col-6">
+                                            <span class="badge text-white mb-2" style="background: {{ constant('ITEM_TYPE_COLOR', item)[item.getType()] }}">{{ item.getType() }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Details item -->
+                                    <div class="row details--item">
+                                        <div class="col-6">
+                                            Priority:
+                                        </div>
+                                        <div class="col-6">
+                                            <i class="{{ constant('ITEM_PRIORITY_ICON', item)[item.getPriority()] }}"></i> {{ item.getPriority() }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Details item -->
+                                    <div class="row details--item">
+                                        <div class="col-6">
+                                            Version:
+                                        </div>
+                                        <div class="col-6">
+                                            None
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <!-- Details item -->
+                                    <div class="row details--item">
+                                        <div class="col-6">
+                                            Status:
+                                        </div>
+                                        <div class="col-6" id="item-status">
+                                            {% if item.getItemStatus() != null %}
+                                                {{ item.getItemStatus().getName() }}
+                                            {% else %}
+                                                None
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <!-- Details item -->
+                                    <div class="row details--item">
+                                        <div class="col-3">
+                                            Sprint:
+                                        </div>
+                                        <div class="col-9">
+                                            {% for sprint in item.getProject().getSprints() %}
+                                                {% if item in sprint.getItems() %}
+                                                    Sprint - {{ sprint.getNumber() }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Details item -->
+                                    <div class="row details--item">
+                                        <div class="col-3">
+                                            Story Points:
+                                        </div>
+                                        <div class="col-9">
+                                            {{ item.getStoryPoints() }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="section">
+                        <div class="section--header">
+                                <span>
+                                    <h6>Description</h6>
+                                    <hr />
+                                </span>
+                        </div>
+                        <div class="section-body p-2">
+                            <p class="task--description">
+                                {{ item.getDescription()|nl2br }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Comments -->
+                    <div class="section">
+                        <div class="section--header">
+                                <span>
+                                    <h6>Comments</h6>
+                                    <hr />
+                                </span>
+                        </div>
+                        <div class="section-body p-2">
+                            <div class="row">
+                                <div class="col-12">
+
+                                    {% if item.getComments().count() == 0 %}
+                                        No comments added yet.
+                                    {% endif %}
+
+                                    {% for comment in item.getComments() %}
+                                        <!-- Comment item -->
+                                        <div class="comment-item">
+                                            <div class="comment-header">
+                                                <div>
+{#                                                    <img class="rounded-image"#}
+{#                                                         src="https://picsum.photos/200/300?random=1" height="60" alt="">#}
+                                                    <a href="#" style="text-decoration: none;">{{ comment.getAuthor().getEmail() }}</a>
+                                                </div>
+                                                &nbsp
+                                                <span>added a comment - {{ comment.getCreated()|date('d/m/y') }}</span> {# lipseste data adaugarii #}
+                                            </div>
+                                            <p class="ps-4 comment-content">
+                                                {{ comment.getMessage()|nl2br }}
+                                            </p>
+                                        </div>
+                                        <hr>
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Right section -->
+                <div class="col-4">
+                    <!-- People -->
+                    <div class="section">
+                        <div class="section--header">
+                                <span>
+                                    <h6>People</h6>
+                                    <hr />
+                                </span>
+                        </div>
+                        <div class="section-body p-2">
+                            <div class="row">
+                                <!-- People item -->
+                                <div class="row details--item">
+                                    <div class="col-6">
+                                        Asignee:
+                                    </div>
+                                    <div class="col-6">
+                                        <span>{{ item.getAsignee().getEmail() }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- People item -->
+                                <div class="row details--item">
+                                    <div class="col-6">
+                                        Reporter:
+                                    </div>
+                                    <div class="col-6">
+                                        <span>{{ item.getReporter().getEmail() }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dates -->
+                    <div class="section">
+                        <div class="section--header">
+                                <span>
+                                    <h6>Dates</h6>
+                                    <hr />
+                                </span>
+                        </div>
+                        <div class="section-body p-2">
+                            <div class="row">
+                                <!-- Dates item -->
+                                <div class="row details--item">
+                                    <div class="col-6">
+                                        Created:
+                                    </div>
+                                    <div class="col-6">
+                                        {{ item.getCreated()|date('d/m/Y') }}
+                                    </div>
+                                </div>
+
+                                <!-- Dates item -->
+                                <div class="row details--item">
+                                    <div class="col-6">
+                                        Updated:
+                                    </div>
+                                    <div class="col-6">
+                                        {{ item.getUpdated()|date('d/m/Y') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section--header">
+                                <span>
+                                    <h6>Agile</h6>
+                                    <hr />
+                                </span>
+                        </div>
+                        <div class="section-body p-2">
+                            <div class="row">
+                                <!-- Agile item -->
+                                <div class="row details--item">
+                                    <div class="col-6">
+                                        Active Sprint:
+                                    </div>
+                                    <div class="col-6">
+                                        {% set sprintsCount = 0 %}
+                                        {% for sprint in item.getSprints() %}
+                                            {% if sprint.getStatus() == constant('STATUS_ACTIVE', sprint) %}
+                                                Sprint - {{ sprint.getNumber() }}
+                                                {% set sprintsCount = sprintsCount + 1 %}
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if sprintsCount == 0 %}
+                                            -
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Agile item -->
+                                <div class="row details--item">
+                                    <div class="col-6">
+                                        Completed Sprints:
+                                    </div>
+                                    <div class="col-6">
+                                        {% set count = 0 %}
+                                        {% for sprint in item.getSprints() %}
+                                            {% if sprint.getStatus() == constant('STATUS_CLOSED', sprint) %}
+                                                <s>Sprint - {{ sprint.getNumber() }}</s>
+                                                {% set count = count + 1 %}
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if count == 0 %}
+                                        -
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Comment -->
+    <div class="modal fade" id="new-comment-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">New Comment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{{ path('task_comment', {id: item.getId(), project: app.request.pathInfo|split('/')[1]}) }}">
+                    <div class="modal-body">
+                        <textarea name="comment" cols="30" rows="5"
+                                  placeholder="Ex. You forgot to implement feature X."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit -->
+    <div class="modal fade" id="edit-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+         aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Edit Issue</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{{ path('task_edit', {id: item.getId(), project: app.request.pathInfo|split('/')[1]}) }}">
+                    <div class="modal-body">
+                        <div class="p-4">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Title</label>
+                                <input type="text" class="form-control" id="title" name="title" value="{{ item.getTitle() }}" placeholder="Migrating to PHP 8">
+                            </div>
+                            <div class="mb-3">
+                                <label for="issueType" class="form-label">Issue Type</label>
+                                <select class="form-select" id="issueType" name="issueType" aria-describedby="emailHelp" required>
+                                    <option value="{{ item.getType() }}" selected hidden>{{ item.getType() }}</option>
+                                    <option value="New Feature">New Feature</option>
+                                    <option value="Bug">Bug</option>
+                                    <option value="Task">Task</option>
+                                    <option value="Improvement">Improvement</option>
+                                    <option value="Epic">Epic</option>
+                                    <option value="Story">Story</option>
+                                </select>
+                                <div id="issueTypeHelp" class="form-text">Type of task you want to create.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="priority" class="form-label">Priority</label>
+                                <select class="form-select" id="priority" name="priority" aria-describedby="priority" required>
+                                    <option value="{{ item.getPriority() }}" selected hidden>{{ item.getPriority() }}</option>
+                                    <option value="Major">Major</option>
+                                    <option value="Critical">Critical</option>
+                                    <option value="Minor">Minor</option>
+                                    <option value="Trivial">Trivial</option>
+                                    <option value="Blocker">Blocker</option>
+                                </select>
+                                <div id="issueTypeHelp" class="form-text">The priority of the task.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="assignee" class="form-label">Asignee</label>
+                                <select class="form-select" id="assignee" name="assignee" aria-describedby="assignee" required>
+                                    {{ render(path('app_project_users', {'project': app.request.pathInfo|split('/')[1], 'selected': item.getAsignee().getEmail()})) }}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="sprint" class="form-label">Sprint</label>
+                                <select class="form-select" id="sprint" name="sprint" aria-describedby="sprint" required>
+                                    <option selected value="0">None</option>
+                                    {{ render(path('sprints_available', {'project': app.request.pathInfo|split('/')[1]})) }}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="story" class="form-label">Story points</label>
+                                <input type="number" class="form-control" value="{{ item.getStoryPoints() }}" id="story" name="storyPoints" placeholder="Ex. 6">
+                            </div>
+                            <div class="mb-3">
+                                <label for="summary" class="form-label">Summary</label>
+                                <textarea class="form-control" id="summary" name="summary" rows="3">{{ item.getDescription() }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

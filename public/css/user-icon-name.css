@@ -1,0 +1,10 @@
+.rounded-icon {
+    border-radius: 50%;
+    height: 30px;
+    line-height: 30px;
+    width: 30px;
+    background: red;
+    border: 1px solid #666;
+    color: #666;
+    text-align: center;
+}

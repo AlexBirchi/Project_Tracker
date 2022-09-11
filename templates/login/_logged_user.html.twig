@@ -1,0 +1,13 @@
+<div class="profile_content">
+  <div class="profile">
+    <div class="profile_details">
+      <img src="https://d1nhio0ox7pgb.cloudfront.net/_img/o_collection_png/green_dark_grey/512x512/plain/user.png"
+           alt="profile">
+      <div class="name_role">
+        <div class="name">{{ user.getUser().getEmail() }}</div>
+        <div class="role">{{ user.getRole() }}</div>
+      </div>
+    </div>
+    <a href="{{ path('app_logout') }}" style="text-decoration: none; color: inherit"><i class="fa-solid fa-arrow-right-from-bracket" id="log_out"></i></a>
+  </div>
+</div>

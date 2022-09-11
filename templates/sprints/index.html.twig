@@ -1,0 +1,264 @@
+{% extends 'base.html.twig' %}
+
+{% block head %}
+    {% block title %}<title>Backlog</title>{% endblock %}
+
+    {% block stylesheets %}
+        <link rel="stylesheet" href="{{asset('css/backlog.css')}}">
+    {% endblock %}
+{% endblock %}
+
+{% block main %}
+    <header class="d-flex justify-content-between">
+        <div class="text">
+            Backlog
+        </div>
+
+        {% if projectRole.getRole() == constant('App\\Entity\\User::ROLE_PRODUCT_OWNER') or projectRole.getRole() == constant('App\\Entity\\User::ROLE_PROJECT_MANAGER') %}
+            <!-- New sprint button -->
+            <div class="d-flex align-items-center m-3" data-bs-toggle="modal" data-bs-target="#create-sprint" style="cursor: pointer">
+                <i class="fa-solid fa-plus"></i>
+            </div>
+        {% endif %}
+    </header>
+
+    <div class="accordion" id="accordionPanelsStayOpenExample">
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('danger') %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for sprint in project.getSprints()|sort((b, a) => a.created <=> b.created) %}
+            {% set showTab = '' %}
+            {% set expanded = "false" %}
+            {% set collapsed = "collapsed" %}
+            {% if sprint == project.getSprints()|last %}
+                {% set showTab = 'show' %}
+                {% set expanded = "true" %}
+                {% set collapsed = "" %}
+            {% endif %}
+
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="panels-{{ sprint.getId() }}-headingOne">
+                    <button class="accordion-button {{ collapsed }}" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#panels-{{ sprint.getId() }}" aria-expanded={{ expanded }}
+                            aria-controls="panels-{{ sprint.getId() }}-collapseOne">
+                        Sprint {{ sprint.getNumber() }}
+                    </button>
+                </h2>
+                <div id="panels-{{ sprint.getId() }}" class="accordion-collapse collapse {{ showTab }}"
+                     aria-labelledby="panelsStayOpen-headingOne">
+                    <div class="accordion-body">
+                        <div class="header d-flex justify-content-between">
+                            <div class="inner">
+                                <div class="sprint--interval">{{ sprint.getCreated()|date('d/m/Y') }} - {{ sprint.getUpdated()|date('d/m/Y') }}</div>
+
+                                <div class="users--container">
+                                    {% set usersCount = 0 %}
+                                    <div class="users--avatars">
+                                        <div class="user--overlap">
+                                            {# Get all the users assigned in this project #}
+                                            {% set assignedUsers = [] %}
+                                            {% for task in  sprint.getItems() %}
+                                                {% set assignedUsers = assignedUsers|merge([task.getAsignee()]) %}
+                                            {% endfor %}
+                                            {# Filter them to get distinct users #}
+                                            {% for user in users %}
+                                                {% if user in assignedUsers %}
+                                                    {# Display only first 3 users #}
+                                                    {% if usersCount < 3 %}
+                                                        <div class="rounded-icon"
+                                                             style="background: {{ random(['#F44336', '#9C27B0', '#2196F3', '#009688', '#8BC34A', '#FFC107']) }}"
+                                                        >
+                                                            {{ user.getEmail()|first|upper }}
+                                                        </div>
+                                                        {% set usersCount = usersCount + 1 %}
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {# Display N - 3 more only if there are more than 3 users#}
+                                    {% if usersCount > 3 %}
+                                        <div class="text-center">and {{ usersCount - 3 }} more.</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div>
+                                <button data-bs-toggle="dropdown" aria-expanded="false" style="background: transparent;border: none">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ path('sprints_activate', {'project': project.getId(), 'id': sprint.getId()}) }}">Make Active</a></li>
+                                    <li><a class="dropdown-item" href="{{ path('sprints_close', {'project': project.getId(), 'id': sprint.getId()}) }}">Close</a></li>
+                                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#delete-sprint-{{ sprint.getId() }}">Delete</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="tasks-container p-1 mt-4">
+                            <!-- Tasks -->
+                            {% for task in  sprint.getItems() %}
+                                <div class="task border p-2">
+                                    <!-- Task type and priority -->
+                                    <div class="task--type ms-2"><i class="{{ constant('ITEM_PRIORITY_ICON', task)[task.getPriority()] }}"></i></div>
+
+                                    <div class="d-flex flex-column ps-4">
+                                        <div class="task--id">
+                                            <a href="{{ path('task_details', {id: task.getId(), project: app.request.pathInfo|split('/')[1]}) }}">
+                                                <span>{{ project.getTag() }} - {{ task.getNumber() }}</span>
+                                            </a>
+                                            <span>&nbsp;{{ task.getTitle() }}</span>
+                                        </div>
+                                        <div class="task--status">
+                                            {{ task.getPriority() }} priority
+                                        </div>
+                                    </div>
+
+                                    <!-- Assginee and story points -->
+                                    <div class="task--assign d-flex flex-row align-items-center ms-auto p-1">
+                                        <div class="rounded-icon"
+                                             style="background: {{ random(['#F44336', '#9C27B0', '#2196F3', '#009688', '#8BC34A', '#FFC107']) }}"
+                                        >
+                                            {{ task.getAsignee.getEmail()|first|upper }}
+                                        </div>
+                                        <div class="difficulty" style="margin-left: .1rem">{{ task.getStoryPoints() }}</div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                            {% if sprint.getItems()|length == 0 %}
+                                <div class="text-center">No available tasks.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{ include('sprints/_delete_form.html.twig') }}
+        {% endfor %}
+
+        {% if project.getSprints()|length == 0 %}
+            <div class="text-center">No available sprints.</div>
+        {% endif %}
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="panelsStayOpen-headingOthers">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#panelsStayOpen-collapseOthers" aria-expanded="false"
+                        aria-controls="panelsStayOpen-collapseThree">
+                    Others
+                </button>
+            </h2>
+            <div id="panelsStayOpen-collapseOthers" class="accordion-collapse collapse"
+                 aria-labelledby="panelsStayOpen-headingOthers">
+                <div class="accordion-body">
+                    <div class="header d-flex justify-content-between">
+                        <div class="inner">
+                            <div class="sprint--interval">Undefined interval.</div>
+
+                            <div class="users--container">
+                                {% set usersCount = 0 %}
+                                <div class="users--avatars">
+                                    <div class="user--overlap">
+                                        {# Get all the users assigned in this project #}
+                                        {% set assignedUsers = [] %}
+                                        {% for task in others %}
+                                            {% set assignedUsers = assignedUsers|merge([task.getAsignee()]) %}
+                                        {% endfor %}
+                                        {# Filter them to get distinct users #}
+                                        {% for user in users %}
+                                            {% if user in assignedUsers %}
+                                                {# Display only first 3 users #}
+                                                {% if usersCount < 3 %}
+                                                    <div class="rounded-icon"
+                                                         style="background: {{ random(['#F44336', '#9C27B0', '#2196F3', '#009688', '#8BC34A', '#FFC107']) }}"
+                                                    >
+                                                        {{ user.getEmail()|first|upper }}
+                                                    </div>
+                                                    {% set usersCount = usersCount + 1 %}
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {# Display N - 3 more only if there are more than 3 users#}
+                                {% if usersCount > 3 %}
+                                    <div class="text-center">and {{ usersCount - 3 }} more.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div>
+                            <i class="fa-solid fa-ellipsis-vertical" style="cursor: pointer;"></i>
+                        </div>
+                    </div>
+
+                    <div class="tasks-container p-1 mt-4">
+                        <!-- Tasks -->
+                        {% for task in others %}
+                            <div class="task border p-2">
+                                <!-- Task type or status, idk, the icon at the start-->
+                                <div class="task--type ms-2"><i class="fa-solid fa-plus"></i></div>
+
+                                <div class="d-flex flex-column ps-4">
+                                    <div class="task--id">
+                                        <a href="{{ path('task_details', {id: task.getId(), project: app.request.pathInfo|split('/')[1]}) }}">
+                                            <span>{{ project.getTag() }} - {{ task.getNumber() }}</span>
+                                        </a>
+                                        <span class="task--description">{{ task.getDescription() }}</span>
+                                    </div>
+                                    <div class="task--status">
+                                        {{ task.getPriority() }} priority
+                                    </div>
+                                </div>
+
+                                <!-- Assgined people and difficulty-->
+                                <div class="task--assign d-flex flex-row align-items-center ms-auto p-1">
+                                    <div class="rounded-icon"
+                                         style="background: {{ random(['#F44336', '#9C27B0', '#2196F3', '#009688', '#8BC34A', '#FFC107']) }}"
+                                    >
+                                        {{ task.getAsignee.getEmail()|first|upper }}
+                                    </div>
+                                    <div class="difficulty" style="margin-left: .1rem">{{ task.getStoryPoints() }}</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        {% if others|length == 0 %}
+                            <div class="text-center">No available tasks.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Create -->
+    <div class="modal fade" id="create-sprint" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+         aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Create Sprint</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    A new sprint will be created. Please confirm your action.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <a type="button" class="btn btn-primary" href="{{ path('sprints_create', {'project': project.getId()}) }}">Confirm</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

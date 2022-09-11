@@ -1,0 +1,48 @@
+@import "fab-button.css";
+
+.teams {
+    padding: 0 1rem 1rem;
+}
+
+.teams .team {
+    padding-bottom: 1rem;
+}
+
+.teams .team .team-header {
+    text-align: center;
+    font-size: 1.2rem;
+    padding-bottom: 1rem;
+    font-weight:800;
+}
+
+.rounded-image {
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+}
+
+.user-role {
+    color: grey;
+    font-size: small;
+}
+
+.user-email {
+    color: grey;
+    font-size: small;
+}
+
+.title,
+.subtitle{
+    color: #1d1b31;
+    margin-left: 12px;
+}
+
+.title {
+    font-size: 25px;
+    font-weight: 500;
+    margin-top: 10px;
+}
+
+.subtitle {
+    font-size: 14px;
+}

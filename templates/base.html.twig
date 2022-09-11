@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- Bootstrap 5 -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+              integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+                crossorigin="anonymous"></script>
+
+        <!-- Font Awesome -->
+        <script src="https://kit.fontawesome.com/127a30cc35.js" crossorigin="anonymous"></script>
+
+        <!-- Custom css -->
+        <link rel="stylesheet" href="{{asset('css/navbar.css')}}">
+
+        <!-- Custom JS -->
+        <script src="{{asset('js/navbar.js')}}" defer></script>
+
+        {% block title %} <title>Tracker</title> {% endblock %}
+        {# Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX #}
+        {% block stylesheets %}
+            {{ encore_entry_link_tags('app') }}
+        {% endblock %}
+
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
+        {% endblock %}
+    </head>
+    <body>
+        {% block body %}
+            <div class="sidebar">
+                <div class="logo_content">
+                    <div class="logo">
+                        <i class="fa-solid fa-diagram-project"></i>
+                        <div class="logo_name">{{ render(path('app_project_current', {'id': app.request.pathInfo|split('/')[1]})) }}</div>
+                    </div>
+                    <i class="fa-solid fa-bars" id="hamburger"></i>
+                </div>
+
+                <!-- Nav menu -->
+                <ul class="nav_list">
+                    <li>
+                        {# Get the project id from URI #}
+                        <a href="{{ path('sprints_backlog', {'project': app.request.pathInfo|split('/')[1]}) }}" class="" id="">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span class="link_name">Backlog</span>
+                        </a>
+                        <span class="tooltip">Backlog</span>
+                    </li>
+
+                    <li>
+                        <a href="{{ path('sprints_active' , {'project': app.request.pathInfo|split('/')[1]}) }}" class="" id="">
+                            <i class="fa-solid fa-bars-progress"></i>
+                            <span class="link_name">Active Sprints</span>
+                        </a>
+                        <span class="tooltip">Active Sprints</span>
+                    </li>
+
+                    <li>
+                        <a href="{{ path('app_project_team', {'project': app.request.pathInfo|split('/')[1]}) }}" class="" id="">
+                            <i class="fa-solid fa-people-group"></i>
+                            <span class="link_name">Team</span>
+                        </a>
+                        <span class="tooltip">Team</span>
+                    </li>
+
+                    <li>
+                        <a href="#" class="" id="">
+                            <i class="fa-solid fa-gear"></i>
+                            <span class="link_name">Settings</span>
+                        </a>
+                        <span class="tooltip">Settings</span>
+                    </li>
+
+                    <li>
+                        <a href="#" class="" id="" data-bs-toggle="modal" data-bs-target="#create-modal">
+                            <i class="fa-solid fa-plus"></i>
+                            <span class="link_name">Create Task</span>
+                        </a>
+                        <span class="tooltip">Create Task</span>
+                    </li>
+                </ul>
+
+                {{ render(path('app_login_user', {'project': app.request.pathInfo|split('/')[1]})) }}
+            </div>
+
+            <!-- Main content -->
+            <div class="main_content">
+                {% block main %}{% endblock %}
+            </div>
+
+
+            <!-- Modal Create -->
+            <div class="modal fade" id="create-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                 aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Create Issue</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="post" action="{{ path('task_create', { project: app.request.pathInfo|split('/')[1]}) }}">
+                            <div class="modal-body">
+                                <div class="p-4">
+                                    <div class="mb-3">
+                                        <label for="title" class="form-label">Title</label>
+                                        <input type="text" class="form-control" id="title" name="title" placeholder="Migrating to PHP 8">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="issueType" class="form-label">Issue Type</label>
+                                        <select class="form-select" id="issueType" name="issueType" aria-describedby="emailHelp" required>
+                                            <option selected value="New Feature">New Feature</option>
+                                            <option value="Bug">Bug</option>
+                                            <option value="Task">Task</option>
+                                            <option value="Improvement">Improvement</option>
+                                            <option value="Epic">Epic</option>
+                                            <option value="Story">Story</option>
+                                        </select>
+                                        <div id="issueTypeHelp" class="form-text">Type of task you want to create.</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="priority" class="form-label">Priority</label>
+                                        <select class="form-select" id="priority" name="priority" aria-describedby="priority" required>
+                                            <option selected value="Major">Major</option>
+                                            <option value="Critical">Critical</option>
+                                            <option value="Minor">Minor</option>
+                                            <option value="Trivial">Trivial</option>
+                                            <option value="Blocker">Blocker</option>
+                                        </select>
+                                        <div id="issueTypeHelp" class="form-text">The priority of the task.</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="assignee" class="form-label">Assignee</label>
+                                        <select class="form-select" id="assignee" name="assignee" aria-describedby="assignee" required>
+                                            {{ render(path('app_project_users', {'project': app.request.pathInfo|split('/')[1]})) }}
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="sprint" class="form-label">Sprint</label>
+                                        <select class="form-select" id="sprint" name="sprint" aria-describedby="sprint" required>
+                                            <option selected value="0">None</option>
+                                            {{ render(path('sprints_available', {'project': app.request.pathInfo|split('/')[1]})) }}
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="story" class="form-label">Story points</label>
+                                        <input type="number" class="form-control" id="story" name="storyPoints" min="0" value="0" placeholder="Ex. 6">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="summary" class="form-label">Summary</label>
+                                        <textarea class="form-control" id="summary" name="summary" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Create</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        {% endblock %}
+    </body>
+</html>

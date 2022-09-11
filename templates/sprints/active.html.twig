@@ -1,0 +1,87 @@
+{% extends 'base.html.twig' %}
+
+{% block head %}
+    {% block title %}<title>Active Sprint</title>{% endblock %}
+
+    {% block stylesheets %}
+        <link rel="stylesheet" href="{{asset('css/kanban.css')}}">
+    {% endblock %}
+
+    {% block javascripts%}
+        <script src="{{ asset('js/kanban.js') }}"></script>
+    {% endblock %}
+{% endblock %}
+
+{% block main %}
+    {% if sprint is null %}
+        <div class="text">
+            <span style="color: grey;">Active Sprint:</span> None
+        </div>
+        <hr>
+
+        <div class="container-fluid">
+            <div class="text-center" style="color: gray">There's no active sprint.</div>
+        </div>
+    {% else %}
+        <div class="text">
+            <span style="color: grey;">Active Sprint:</span> Sprint - {{ sprint.getNumber() }}
+        </div>
+        <hr>
+
+        <!-- Spinner -->
+        <div id="spinner" class="spinner-end" hidden>
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <!-- Kanban board-->
+        <div class="grid-container">
+            {% for status in statuses %}
+                    <!-- Start lane -->
+                    <div class="grid-item">
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h3 class="card-title h5 mb-1">
+                                    {{ status.getName() }}
+                                </h3>
+                            </div>
+                            <div class="card-body" id="{{ status.getName() }}" ondragover="onDragOver(event);" ondrop="onDrop(event);">
+                                {% for item in sprint.getItems() %}
+                                    {% if item.getItemStatus().getId() == status.getId() %}
+                                        <!-- Start task -->
+                                        <div class="card mb-3 cursor-grab" id="{{ item.getId() }}"
+                                             draggable="true" ondragstart="onDragStart(event)" url="{{ path('app_item_status_change', {'project': project.getId(), 'id': item.getId()}) }}">
+                                            <div class="card-body">
+                                                <div>
+                                                    <span><i class="{{ constant('ITEM_PRIORITY_ICON', item)[item.getPriority()] }}"></i></span>
+                                                    <span><a href="{{ path('task_details', {id: item.getId(), project: app.request.pathInfo|split('/')[1]}) }}" style="text-decoration: none;text-transform: uppercase;">{{ project.getTag() }} - {{ item.getNumber() }}</a></span>
+                                                    <span class="badge text-white mb-2" style="background: {{ constant('ITEM_TYPE_COLOR', item)[item.getType()] }}">{{ item.getType() }}</span>
+                                                </div>
+
+                                                <p class="mb-0">{{ item.getTitle() }}</p>
+
+                                                <!-- Assgined people and difficulty-->
+                                                <div class="task--assign d-flex flex-row align-items-center justify-content-center p-1">
+                                                    <div class="rounded-icon"
+                                                         style="background: {{ random(['#F44336', '#9C27B0', '#2196F3', '#009688', '#8BC34A', '#FFC107']) }}"
+                                                    >
+                                                        {{ item.getAsignee.getEmail()|first|upper }}
+                                                    </div>
+                                                    <div class="difficulty" style="margin-left: .1rem">{{ item.getStoryPoints() }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- End task -->
+                                    {% endif %}
+                                {% endfor %}
+
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+        </div>
+
+    {% endif %}
+
+{% endblock %}

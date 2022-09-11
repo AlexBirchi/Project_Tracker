@@ -1,0 +1,95 @@
+@import "fab-button.css";
+
+/* Sprint item */
+.sprint--interval {
+    font-size: .75rem;
+    color: grey;
+}
+
+/* Stacking user icons*/
+.rounded-icon {
+    border-radius: 50%;
+    height: 30px;
+    line-height: 30px;
+    width: 30px;
+    background: red;
+    border: 1px solid #666;
+    color: #666;
+    text-align: center;
+}
+
+.users--avatars {
+    display: flex;
+    justify-content: start;
+}
+
+.user--overlap {
+    display: flex;
+}
+.user--overlap div:not(:first-child) {
+    margin-left: -15px;
+}
+.user--overlap div {
+    height: 35px;
+    width: 35px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+/* Tasks */
+.tasks-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.task {
+    min-height: 45px;
+    display: flex;
+    align-items: center;
+}
+
+.task--id {
+    font-size: 1rem;
+    display: flex;
+}
+
+.task--description {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 18ch;
+    margin-left: .25rem;
+}
+
+.task--id a {
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.task--id a:hover {
+    text-decoration: underline;
+}
+
+.task--status {
+    font-size: .75rem;
+    color: gray;
+}
+
+.task--assign img {
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+.task--assign .difficulty {
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    background: #fff;
+    border: 1px solid #666;
+    color: #666;
+    text-align: center;
+}
